@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>HubSpot Forms API Example</title>
+</head>
+
+<body>
+	<h1>HubSpot Forms API Example</h1>
+	<form>
+		First Name:
+		<input type="text" name="firstname" /><br> Last Name:
+		<input type="text" name="lastname" /><br> Email Address:
+		<input type="email" name="email" /><br>
+		<input type="submit" name="submit" value="submit" />
+	</form>
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+<script>
+	/*
+					FUNCTION TO GET COOKIE BY NAME
+					*/
+	function getCookie(cname) {
+		var name = cname + "=";
+		var decodedCookie = decodeURIComponent(document.cookie);
+		var ca = decodedCookie.split(';');
+		for (var i = 0; i < ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0) == ' ') {
+				c = c.substring(1);
+			}
+			if (c.indexOf(name) == 0) {
+				return c.substring(name.length, c.length);
+			}
+		}
+		return "";
+	}
+
+
+	/*
+	SUBMIT THE FORM
+	*/
+
+
+	$('form').submit(function(e) {
+		e.preventDefault();
+		var hubspottoken = getCookie('hubspotutk'); //Get the users cookie
+		var pageTitle = document.title; //Title of page
+		var pageURL = document.URL; //URL of page
+		var submissionTime = new Date().getTime(); //Get time in milliseconds to record submission
+		var formData = $(this).serializeArray(); //Get the form data and convert to an array
+
+
+		console.log("cookie");
+
+		var payload = {
+			"submittedAt": submissionTime,
+			"fields": formData,
+			"context": {
+				"hutk": hubspottoken,
+				"pageUri": pageURL,
+				"pageName": pageTitle
+			},
+			"skipValidation": false
+		}
+
+		console.log("=== PAYLOAD ===")
+		console.log(JSON.stringify(payload));
+		console.log("=== PAYLOAD ===")
+
+		//Define settings for AJAX request
+		var settings = {
+			"async": true,
+			"crossDomain": true,
+			"url": "https://api.hsforms.com/submissions/v3/integration/submit/6325259/0e64307d-dac2-4558-94e7-b45c2983666b", //FORM API ENDPOINT
+			"method": "POST",
+			"headers": {
+				"Content-Type": "application/json",
+			},
+			"processData": false,
+			"data": JSON.stringify(payload)
+		}
+
+		//Make the request (POST DATA TO HUBSPOT)
+		$.ajax(settings).done(function(response) {
+			console.log(response); //Output the response
+		});
+	});
+
+</script>
+<!-- Start of HubSpot Embed Code -->
+<script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/6325259.js"></script>
+<!-- End of HubSpot Embed Code -->
+</html>
